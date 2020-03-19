@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+# DISCIPLINA - PROCESSAMENTO DIGITAL DE IMAGENS
+# SEMESTRE - 2020.1
+# ALUNO - LUCAS ISMAEL CAMPOS MEDEIROS
+import subprocess, os
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -22,35 +26,69 @@ def my_readimage(path):
             intensity_matrix[i][j] = int(aux_matrix[i][j])
     return read_header, rows, columns, max_intensity, intensity_matrix
 
-header, rows, columns, max_intensity, matrix = my_readimage('/home/lucasismael/PDI/images/testeM.pgm')
-#rows = 64
-#columns = 64
-
+def my_writeimage():
+    print('SALVANDO NOVO ARQUIVO')
+    file_name = input('Nome do arquivo de saída:')+'.pgm'
+    with open(file_name, 'w') as saida:
+        saida.write(str(header))
+        saida.write(str(columns) + ' ' + str(rows) + '\n')
+        saida.write(str(max_intensity))
+        np.savetxt(saida, new_matrix, delimiter=' ', newline='\n', header='', footer='', comments='# ', fmt='%i')
+        
+    
+## INÍCIO DO SCRIPT ## 
+# LENDO ARQUIVO
+print('LEITURA DA IMAGEM')        
+header, rows, columns, max_intensity, matrix = my_readimage('/home/lucasismael/PDI_2020/images/'+input('Nome do arquivo de entrada(.pgm):')+'.pgm')
+print('--------------------------------------')
+# QUANTIDADE DE NÍVEIS DE INTENSIDADE
+intensity_quantity = int(max_intensity)+1
+#print('QUANTIDADE DE INTENSIDADES: ' + str(intensity_quantity))
+# QUANTIDADE DE PIXELS NA IMAGEM
 total_pixels = rows*columns
-y = np.arange(0,256,1,int)
-#y = np.arange(0,8,1,int)
-r = np.zeros(int(max_intensity)+1, int)
-#r = np.array([790,1023,850,656,329,245,122,81])
-
+#print('QUANTIDADE DE PIXELS: ' + str(total_pixels))
+# CONTANDO A INTENSIDADE DE CADA NÍVEL
+#print('CONTAGEM DAS INTENSIDADES')
+r = np.zeros(intensity_quantity, int)
 for k in range(len(r)):
     r[k] = np.count_nonzero(matrix == k)
-    
-#histograma não equalizado
-#plt.bar(y,r)
-#plt.show()
-
+# CALCULANDO A PROBABILIDADE DE CADA NÍVEL 
+#print('CALCULANDO AS PROBABILIDADES')    
 r_prob = r/total_pixels
+# CALCULANDO A CDF
+#print('CALCULANDO A CDF') 
 cdf = np.cumsum(r_prob)
-eq_out = np.arange(0,256,1,int)
-#eq_out = np.arange(0,8,1,int)
-for l in range(len(eq_out)):
-    eq_out[l] = np.ceil(int(max_intensity)*cdf[l])
-    #eq_out[l] = np.ceil(7*cdf[l])
-    
-#histograma equalizado
-#plt.figure()    
-#plt.bar(y,eq_out)
+# CONSTRUÍNDO O MAPEAMENTO 
+#print('CONSTRUÍNDO O MAPEAMENTO')
+eq_map = np.arange(0,intensity_quantity,1,int)
+for l in range(len(eq_map)):
+    eq_map[l] = np.ceil(int(max_intensity)*cdf[l])
+# MAPEANDO OS NOVOS VALORES 
+#print('MAPEANDO OS NOVOS VALORES')
+new_matrix = np.array(matrix)
+for iz in range(len(eq_map)):    
+    new_matrix = np.where(matrix != iz, new_matrix, eq_map[iz])
+
+# ESCREVENDO AS INFORMAÇÕES EM UM NOVO ARQUIVO
+#print('CONSTRUÍNDO ARQUIVO DE SAÍDA')
+my_writeimage()
+
+print('--------------------------------------')
+print('PLOTANDO HISTOGRAMAS')
+#PLOTANDO HISTOGRAMAS
+#histograma não equalizado
+y = np.arange(0,intensity_quantity,1,int)
+plt.bar(y,r)
+plt.title('Histograma Original')
 #plt.show()
+#histograma equalizado
+plt.figure()    
+plt.bar(y,eq_map)
+plt.title('Histograma Equalizado')
+plt.show()
+
+
+
                
         
 
