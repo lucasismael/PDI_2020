@@ -61,7 +61,8 @@ cdf = np.cumsum(r_prob)
 # CONSTRUÍNDO O MAPEAMENTO 
 #print('CONSTRUÍNDO O MAPEAMENTO')
 eq_map = np.arange(0,intensity_quantity,1,int)
-for l in range(len(eq_map)):
+#for l in range(len(eq_map)):
+for l in range(intensity_quantity):
     eq_map[l] = np.ceil(int(max_intensity)*cdf[l])
 # MAPEANDO OS NOVOS VALORES 
 #print('MAPEANDO OS NOVOS VALORES')
